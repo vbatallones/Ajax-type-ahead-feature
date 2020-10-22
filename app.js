@@ -5,13 +5,12 @@ const cities = []
 
 // get the json data from the endpoint using fetch
 fetch(endpoint)
-// if you console log the data you will see different kinds of file, but we need to go in the json to access the cities and state.
+    // if you console log the data you will see different kinds of file, but we need to go in the json to access the cities and state.
     // fetching the data in the json file. that is why we have "data.json()"
-    .then(data => data.json())
+    .then(blob => blob.json())
+// now that we have our json data, we need to transfer the json data into our cities array.
+    .then(data => cities.push(...data))
 
-    // now that we have our json data, we need to transfer the json data into our cities array.
-    .then(result => cities.push(...result))
-    
 
 function findMatches(wordToMatch, cities) {
     return cities.filter(place => {
@@ -21,3 +20,29 @@ function findMatches(wordToMatch, cities) {
         return place.city.match(regex) || place.state.match(regex)
     })
 }
+
+function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+function displayMatches() {
+    const matchArray = findMatches(this.value, cities)
+    const html = matchArray.map(place => {
+        const regex = new RegExp(this.value, 'gi')
+        const cityName = place.city.replace(regex, `<span class="hl">${this.value}</span>`)
+        const stateName = place.state.replace(regex, `<span class="hl">${this.value}</span>`)
+        return `
+        <li>
+            <span class="name">${cityName}, ${stateName}</span>
+            <span class="population">${numberWithCommas(place.population)}</span>
+        </li>
+        `;
+    }).join('');
+    suggestions.innerHTML = html
+}
+
+const searchInput = document.querySelector('.search')
+const suggestions = document.querySelector('.suggestions')
+
+searchInput.addEventListener('change', displayMatches);
+searchInput.addEventListener('keyup', displayMatches);
